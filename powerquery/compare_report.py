@@ -64,7 +64,7 @@ def run(month: str, db_path: str | Path, export_dir: str | Path, xlsx: str | Pat
     snapshot = Path(snapshot)
     if update_snapshot:
         snapshot.parent.mkdir(parents=True, exist_ok=True)
-        snapshot.write_text(json.dumps(sql, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        snapshot.write_text(json.dumps(sql, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     problems = [f"sql vs m_port: {d}" for d in diff(sql, m)]
     problems += [f"sql vs excel: {d}" for d in diff(excel_view(sql), excel)]
     if snapshot.exists():
