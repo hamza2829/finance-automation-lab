@@ -1,0 +1,113 @@
+{
+  "name": "fal-escalation-after-3-days",
+  "properties": {
+    "displayName": "FAL - 3 Escalation after 3 days",
+    "description": "Runs daily at 07:00. Escalates level-1 approvals without a decision for 3 x 24h to the finance lead, starts a new approval for the lead and notifies them. Definition only: never imported or run in this repository.",
+    "state": "Started",
+    "connectionReferences": {
+      "shared_office365": {
+        "connectionName": "PLACEHOLDER-office365",
+        "source": "Invoker",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": { "defaultValue": {}, "type": "Object" },
+        "$authentication": { "defaultValue": {}, "type": "SecureObject" },
+        "apiBaseUrl": { "defaultValue": "http://localhost:8000", "type": "String" },
+        "approvalFlowUrl": { "defaultValue": "https://example.com/approval-flow-trigger", "type": "String" },
+        "escalationDays": { "defaultValue": 3, "type": "Int" },
+        "itOpsMailbox": { "defaultValue": "it-ops@example.com", "type": "String" }
+      },
+      "triggers": {
+        "Every_day_at_7": {
+          "type": "Recurrence",
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "timeZone": "W. Europe Standard Time",
+            "schedule": { "hours": ["7"], "minutes": [0] }
+          }
+        }
+      },
+      "actions": {
+        "Escalate_overdue_approvals": {
+          "type": "Http",
+          "runAfter": {},
+          "inputs": {
+            "method": "POST",
+            "uri": "@{parameters('apiBaseUrl')}/approvals/escalate-overdue?days=@{parameters('escalationDays')}"
+          },
+          "retryPolicy": { "type": "exponential", "count": 3, "interval": "PT1M" }
+        },
+        "For_each_escalation": {
+          "type": "Foreach",
+          "runAfter": { "Escalate_overdue_approvals": ["Succeeded"] },
+          "foreach": "@body('Escalate_overdue_approvals')",
+          "actions": {
+            "Get_escalated_invoice": {
+              "type": "Http",
+              "runAfter": {},
+              "inputs": {
+                "method": "GET",
+                "uri": "@{parameters('apiBaseUrl')}/invoices/@{items('For_each_escalation')?['invoice_id']}"
+              }
+            },
+            "Start_finance_lead_approval": {
+              "type": "Http",
+              "runAfter": { "Get_escalated_invoice": ["Succeeded"] },
+              "inputs": {
+                "method": "POST",
+                "uri": "@parameters('approvalFlowUrl')",
+                "body": {
+                  "invoice_id": "@items('For_each_escalation')?['invoice_id']",
+                  "approval_id": "@items('For_each_escalation')?['id']"
+                }
+              }
+            },
+            "Notify_finance_lead": {
+              "type": "OpenApiConnection",
+              "runAfter": { "Get_escalated_invoice": ["Succeeded"] },
+              "inputs": {
+                "host": { "connectionName": "shared_office365", "operationId": "SendEmailV2", "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365" },
+                "parameters": {
+                  "emailMessage/To": "@{items('For_each_escalation')?['approver']}",
+                  "emailMessage/Subject": "Escalated: invoice @{body('Get_escalated_invoice')?['invoice_number']}",
+                  "emailMessage/Body": "<p>No decision by the cost center manager within @{parameters('escalationDays')} days. A new approval has been assigned to you.</p>"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runtimeConfiguration": { "concurrency": { "repetitions": 1 } }
+        },
+        "Compose_summary": {
+          "type": "Compose",
+          "runAfter": { "For_each_escalation": ["Succeeded", "Failed"] },
+          "inputs": {
+            "escalated": "@length(body('Escalate_overdue_approvals'))",
+            "run": "@utcNow()"
+          }
+        },
+        "Alert_IT_on_failure": {
+          "type": "OpenApiConnection",
+          "runAfter": { "Escalate_overdue_approvals": ["Failed", "TimedOut"] },
+          "inputs": {
+            "host": { "connectionName": "shared_office365", "operationId": "SendEmailV2", "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365" },
+            "parameters": {
+              "emailMessage/To": "@parameters('itOpsMailbox')",
+              "emailMessage/Subject": "Escalation job failed",
+              "emailMessage/Body": "<p>Status @{outputs('Escalate_overdue_approvals')?['statusCode']}. Overdue approvals were not escalated today.</p>"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "outputs": {}
+    }
+  }
+}

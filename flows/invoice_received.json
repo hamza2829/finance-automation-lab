@@ -1,0 +1,214 @@
+{
+  "name": "fal-invoice-received",
+  "properties": {
+    "displayName": "FAL - 1 Invoice received",
+    "description": "Stores an inbound invoice, stops duplicates and invalid documents, runs the AI classification and starts the cost center approval. Definition only: never imported or run in this repository.",
+    "state": "Started",
+    "connectionReferences": {
+      "shared_office365": {
+        "connectionName": "PLACEHOLDER-office365",
+        "source": "Invoker",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified"
+      },
+      "shared_teams": {
+        "connectionName": "PLACEHOLDER-teams",
+        "source": "Invoker",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_teams",
+        "tier": "NotSpecified"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": { "defaultValue": {}, "type": "Object" },
+        "$authentication": { "defaultValue": {}, "type": "SecureObject" },
+        "apiBaseUrl": { "defaultValue": "http://localhost:8000", "type": "String" },
+        "approvalFlowUrl": { "defaultValue": "https://example.com/approval-flow-trigger", "type": "String" },
+        "apTeamMailbox": { "defaultValue": "ap-team@example.com", "type": "String" }
+      },
+      "triggers": {
+        "When_an_invoice_is_received": {
+          "type": "Request",
+          "kind": "Http",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "required": ["invoice_number", "vendor_id", "description", "net_cents", "tax_cents", "gross_cents", "invoice_date"],
+              "properties": {
+                "invoice_number": { "type": "string" },
+                "vendor_id": { "type": "string" },
+                "description": { "type": "string" },
+                "net_cents": { "type": "integer" },
+                "tax_cents": { "type": "integer" },
+                "gross_cents": { "type": "integer" },
+                "invoice_date": { "type": "string" },
+                "document_type": { "type": "string" },
+                "currency": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "actions": {
+        "Create_invoice": {
+          "type": "Http",
+          "runAfter": {},
+          "inputs": {
+            "method": "POST",
+            "uri": "@{parameters('apiBaseUrl')}/invoices",
+            "headers": { "Content-Type": "application/json" },
+            "body": "@triggerBody()"
+          }
+        },
+        "Route_by_intake_status": {
+          "type": "Switch",
+          "runAfter": { "Create_invoice": ["Succeeded"] },
+          "expression": "@body('Create_invoice')?['invoice']?['status']",
+          "cases": {
+            "Case_duplicate": {
+              "case": "duplicate",
+              "actions": {
+                "Notify_AP_duplicate": {
+                  "type": "OpenApiConnection",
+                  "runAfter": {},
+                  "inputs": {
+                    "host": { "connectionName": "shared_office365", "operationId": "SendEmailV2", "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365" },
+                    "parameters": {
+                      "emailMessage/To": "@parameters('apTeamMailbox')",
+                      "emailMessage/Subject": "Duplicate invoice @{triggerBody()?['invoice_number']} stopped",
+                      "emailMessage/Body": "<p>Stored as duplicate of invoice @{body('Create_invoice')?['invoice']?['duplicate_of']}. No approval started.</p>"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Stop_duplicate": {
+                  "type": "Terminate",
+                  "runAfter": { "Notify_AP_duplicate": ["Succeeded", "Failed"] },
+                  "inputs": { "runStatus": "Cancelled" }
+                }
+              }
+            },
+            "Case_on_hold": {
+              "case": "on_hold",
+              "actions": {
+                "Notify_AP_on_hold": {
+                  "type": "OpenApiConnection",
+                  "runAfter": {},
+                  "inputs": {
+                    "host": { "connectionName": "shared_office365", "operationId": "SendEmailV2", "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365" },
+                    "parameters": {
+                      "emailMessage/To": "@parameters('apTeamMailbox')",
+                      "emailMessage/Subject": "Invoice @{triggerBody()?['invoice_number']} on hold",
+                      "emailMessage/Body": "<p>Validation issues: @{join(body('Create_invoice')?['issues'], ', ')}</p>"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Stop_on_hold": {
+                  "type": "Terminate",
+                  "runAfter": { "Notify_AP_on_hold": ["Succeeded", "Failed"] },
+                  "inputs": { "runStatus": "Cancelled" }
+                }
+              }
+            }
+          },
+          "default": {
+            "actions": {
+              "Classify_with_AI": {
+                "type": "Http",
+                "runAfter": {},
+                "inputs": {
+                  "method": "POST",
+                  "uri": "@{parameters('apiBaseUrl')}/invoices/@{body('Create_invoice')?['invoice']?['id']}/classify"
+                },
+                "limit": { "timeout": "PT30S" }
+              },
+              "Needs_human_review": {
+                "type": "If",
+                "runAfter": { "Classify_with_AI": ["Succeeded"] },
+                "expression": {
+                  "and": [ { "equals": ["@body('Classify_with_AI')?['needs_human_review']", true] } ]
+                },
+                "actions": {
+                  "Post_review_request_to_Teams": {
+                    "type": "OpenApiConnection",
+                    "runAfter": {},
+                    "inputs": {
+                      "host": { "connectionName": "shared_teams", "operationId": "PostMessageToConversation", "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams" },
+                      "parameters": {
+                        "poster": "Flow bot",
+                        "location": "Channel",
+                        "body/recipient/groupId": "PLACEHOLDER-team-id",
+                        "body/recipient/channelId": "PLACEHOLDER-channel-id",
+                        "body/messageBody": "<p>Invoice @{body('Create_invoice')?['invoice']?['id']}: AI confidence @{body('Classify_with_AI')?['invoice']?['ai_confidence']} is below @{body('Classify_with_AI')?['threshold']}. Please set cost center and category.</p>"
+                      },
+                      "authentication": "@parameters('$authentication')"
+                    }
+                  }
+                },
+                "else": {
+                  "actions": {
+                    "Start_cost_center_approval": {
+                      "type": "Http",
+                      "runAfter": {},
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@{parameters('apiBaseUrl')}/invoices/@{body('Create_invoice')?['invoice']?['id']}/approvals"
+                      }
+                    },
+                    "Call_approval_flow": {
+                      "type": "Http",
+                      "runAfter": { "Start_cost_center_approval": ["Succeeded"] },
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@parameters('approvalFlowUrl')",
+                        "body": {
+                          "invoice_id": "@body('Create_invoice')?['invoice']?['id']",
+                          "approval_id": "@body('Start_cost_center_approval')?['id']"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Classification_failed": {
+                "type": "OpenApiConnection",
+                "runAfter": { "Classify_with_AI": ["Failed", "TimedOut"] },
+                "inputs": {
+                  "host": { "connectionName": "shared_office365", "operationId": "SendEmailV2", "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365" },
+                  "parameters": {
+                    "emailMessage/To": "@parameters('apTeamMailbox')",
+                    "emailMessage/Subject": "Classification failed for invoice @{body('Create_invoice')?['invoice']?['id']}",
+                    "emailMessage/Body": "<p>Please classify manually. Status: @{outputs('Classify_with_AI')?['statusCode']}</p>"
+                  },
+                  "authentication": "@parameters('$authentication')"
+                }
+              }
+            }
+          }
+        },
+        "Intake_failed": {
+          "type": "OpenApiConnection",
+          "runAfter": { "Create_invoice": ["Failed", "TimedOut"] },
+          "inputs": {
+            "host": { "connectionName": "shared_office365", "operationId": "SendEmailV2", "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365" },
+            "parameters": {
+              "emailMessage/To": "@parameters('apTeamMailbox')",
+              "emailMessage/Subject": "Invoice intake failed: @{triggerBody()?['invoice_number']}",
+              "emailMessage/Body": "<p>HTTP status @{outputs('Create_invoice')?['statusCode']}. The document was not stored.</p>"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Fail_run_after_intake_error": {
+          "type": "Terminate",
+          "runAfter": { "Intake_failed": ["Succeeded", "Failed"] },
+          "inputs": { "runStatus": "Failed", "runError": { "code": "IntakeFailed", "message": "Invoice could not be stored" } }
+        }
+      },
+      "outputs": {}
+    }
+  }
+}

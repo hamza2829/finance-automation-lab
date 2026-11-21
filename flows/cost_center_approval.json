@@ -1,0 +1,146 @@
+{
+  "name": "fal-cost-center-approval",
+  "properties": {
+    "displayName": "FAL - 2 Approval by cost center manager",
+    "description": "Sends an approval request to the approver of the open approval (cost center manager, or finance lead after escalation) and writes the decision back to the approval API. Definition only: never imported or run in this repository.",
+    "state": "Started",
+    "connectionReferences": {
+      "shared_approvals": {
+        "connectionName": "PLACEHOLDER-approvals",
+        "source": "Invoker",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+        "tier": "NotSpecified"
+      },
+      "shared_office365": {
+        "connectionName": "PLACEHOLDER-office365",
+        "source": "Invoker",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": { "defaultValue": {}, "type": "Object" },
+        "$authentication": { "defaultValue": {}, "type": "SecureObject" },
+        "apiBaseUrl": { "defaultValue": "http://localhost:8000", "type": "String" },
+        "apTeamMailbox": { "defaultValue": "ap-team@example.com", "type": "String" }
+      },
+      "triggers": {
+        "When_an_approval_is_requested": {
+          "type": "Request",
+          "kind": "Http",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "required": ["invoice_id", "approval_id"],
+              "properties": {
+                "invoice_id": { "type": "integer" },
+                "approval_id": { "type": "integer" }
+              }
+            }
+          }
+        }
+      },
+      "actions": {
+        "Get_approval": {
+          "type": "Http",
+          "runAfter": {},
+          "inputs": {
+            "method": "GET",
+            "uri": "@{parameters('apiBaseUrl')}/approvals/@{triggerBody()?['approval_id']}"
+          }
+        },
+        "Get_invoice": {
+          "type": "Http",
+          "runAfter": { "Get_approval": ["Succeeded"] },
+          "inputs": {
+            "method": "GET",
+            "uri": "@{parameters('apiBaseUrl')}/invoices/@{triggerBody()?['invoice_id']}"
+          }
+        },
+        "Get_cost_center": {
+          "type": "Http",
+          "runAfter": { "Get_invoice": ["Succeeded"] },
+          "inputs": {
+            "method": "GET",
+            "uri": "@{parameters('apiBaseUrl')}/cost-centers/@{body('Get_invoice')?['cost_center_id']}"
+          }
+        },
+        "Start_and_wait_for_an_approval": {
+          "type": "OpenApiConnectionWebhook",
+          "runAfter": { "Get_cost_center": ["Succeeded"] },
+          "inputs": {
+            "host": { "connectionName": "shared_approvals", "operationId": "StartAndWaitForAnApproval", "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals" },
+            "parameters": {
+              "approvalType": "Basic",
+              "WebhookApprovalCreationInput/title": "Invoice @{body('Get_invoice')?['invoice_number']} - @{div(body('Get_invoice')?['gross_cents'], 100)} EUR",
+              "WebhookApprovalCreationInput/assignedTo": "@{body('Get_approval')?['approver']}",
+              "WebhookApprovalCreationInput/details": "Cost center @{body('Get_cost_center')?['id']} @{body('Get_cost_center')?['name']}\nCategory @{body('Get_invoice')?['booking_category']}\n@{body('Get_invoice')?['description']}",
+              "WebhookApprovalCreationInput/enableNotifications": true,
+              "WebhookApprovalCreationInput/enableReassignment": false
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Switch_on_outcome": {
+          "type": "Switch",
+          "runAfter": { "Start_and_wait_for_an_approval": ["Succeeded"] },
+          "expression": "@body('Start_and_wait_for_an_approval')?['outcome']",
+          "cases": {
+            "Case_approve": {
+              "case": "Approve",
+              "actions": {
+                "Record_approval": {
+                  "type": "Http",
+                  "runAfter": {},
+                  "inputs": {
+                    "method": "POST",
+                    "uri": "@{parameters('apiBaseUrl')}/invoices/@{triggerBody()?['invoice_id']}/approve",
+                    "body": {
+                      "approver": "@{body('Start_and_wait_for_an_approval')?['responses']?[0]?['responder']?['email']}",
+                      "comment": "@{body('Start_and_wait_for_an_approval')?['responses']?[0]?['comments']}"
+                    }
+                  }
+                }
+              }
+            },
+            "Case_reject": {
+              "case": "Reject",
+              "actions": {
+                "Record_rejection": {
+                  "type": "Http",
+                  "runAfter": {},
+                  "inputs": {
+                    "method": "POST",
+                    "uri": "@{parameters('apiBaseUrl')}/invoices/@{triggerBody()?['invoice_id']}/reject",
+                    "body": {
+                      "approver": "@{body('Start_and_wait_for_an_approval')?['responses']?[0]?['responder']?['email']}",
+                      "comment": "@{coalesce(body('Start_and_wait_for_an_approval')?['responses']?[0]?['comments'], 'Rejected without comment')}"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": { "actions": {} }
+        },
+        "Decision_not_recorded": {
+          "type": "OpenApiConnection",
+          "runAfter": { "Switch_on_outcome": ["Failed", "TimedOut"] },
+          "inputs": {
+            "host": { "connectionName": "shared_office365", "operationId": "SendEmailV2", "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365" },
+            "parameters": {
+              "emailMessage/To": "@parameters('apTeamMailbox')",
+              "emailMessage/Subject": "Approval decision for invoice @{triggerBody()?['invoice_id']} not recorded",
+              "emailMessage/Body": "<p>The approval API refused the decision (e.g. 403 after escalation to the finance lead, or 409 if already decided). Please check the invoice.</p>"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "outputs": {}
+    }
+  }
+}
