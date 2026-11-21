@@ -1,11 +1,12 @@
-__pycache__/
 *.pyc
-.venv/
-.pytest_cache/
 .coverage
+.coverage*
+.pytest_cache/
+.venv/
+__pycache__/
+build/
 coverage.xml
-htmlcov/
 data/*.db
 data/export/
-build/
+htmlcov/
 powerquery/output/
