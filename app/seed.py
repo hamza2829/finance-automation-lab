@@ -163,7 +163,10 @@ def generate_documents(rng: random.Random) -> list[Doc]:
                         src.true_category, "duplicate", idx))
     for idx in rng.sample(normal, INJECTED["suspected_duplicates"]):
         src = docs[idx]
-        reissued = wf.InvoiceIn(src.doc.invoice_number + "-R", src.doc.vendor_id, src.doc.description,
+        # vendor re-issues the same invoice under the next free number of its sequence
+        counters[src.doc.vendor_id] += rng.randint(1, 9)
+        new_number = f"{src.doc.invoice_number.rsplit('-', 1)[0]}-{counters[src.doc.vendor_id]:05d}"
+        reissued = wf.InvoiceIn(new_number, src.doc.vendor_id, src.doc.description,
                                 src.doc.net_cents, src.doc.tax_cents, src.doc.gross_cents,
                                 (date.fromisoformat(src.doc.invoice_date) + timedelta(days=rng.randint(0, 3))).isoformat())
         docs.append(Doc(reissued, src.received_at + timedelta(days=rng.randint(2, 12)),

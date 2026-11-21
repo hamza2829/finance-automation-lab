@@ -1,32 +1,37 @@
 {
   "summary": {
     "report_month": "2026-10",
-    "open_count": 9,
-    "open_gross_cents": 3623313,
-    "approved_count": 76,
-    "avg_approval_hours": 55.58,
-    "median_approval_hours": 33.73,
+    "open_count": 8,
+    "open_gross_cents": 2778131,
+    "approved_count": 79,
+    "avg_approval_hours": 54.44,
+    "median_approval_hours": 31.62,
     "max_approval_hours": 167.45,
-    "within_3_days_pct": 75.0,
+    "within_3_days_pct": 75.9,
     "escalated_count": 18,
-    "rejected_count": 13,
-    "rejected_gross_cents": 8175626
+    "rejected_count": 12,
+    "rejected_gross_cents": 8045287
   },
   "open_by_status": [
     {
       "status": "escalated",
+      "count": 2,
+      "gross_cents": 563314
+    },
+    {
+      "status": "needs_review",
       "count": 1,
-      "gross_cents": 69121
+      "gross_cents": 673872
     },
     {
       "status": "pending_approval",
-      "count": 8,
-      "gross_cents": 3554192
+      "count": 5,
+      "gross_cents": 1540945
     }
   ],
   "open_items": [
     {
-      "id": 282,
+      "id": 283,
       "invoice_number": "HA-2026-00480",
       "vendor_id": "V-009",
       "cost_center_id": "CC-600",
@@ -36,27 +41,27 @@
       "age_days": 4
     },
     {
-      "id": 288,
-      "invoice_number": "AS-2026-00472",
-      "vendor_id": "V-016",
+      "id": 285,
+      "invoice_number": "SW-2026-00461",
+      "vendor_id": "V-014",
       "cost_center_id": "CC-300",
-      "status": "pending_approval",
-      "gross_cents": 364552,
-      "received_at": "2026-10-28T13:03:00",
-      "age_days": 3
+      "status": "escalated",
+      "gross_cents": 494193,
+      "received_at": "2026-10-27T12:34:00",
+      "age_days": 4
     },
     {
       "id": 290,
-      "invoice_number": "MK-2026-00455",
-      "vendor_id": "V-007",
-      "cost_center_id": "CC-200",
+      "invoice_number": "GF-2026-00466",
+      "vendor_id": "V-011",
+      "cost_center_id": "CC-300",
       "status": "pending_approval",
-      "gross_cents": 1114187,
-      "received_at": "2026-10-29T16:19:00",
+      "gross_cents": 577050,
+      "received_at": "2026-10-29T12:46:00",
       "age_days": 2
     },
     {
-      "id": 291,
+      "id": 292,
       "invoice_number": "NL-2026-00430",
       "vendor_id": "V-012",
       "cost_center_id": "CC-300",
@@ -66,7 +71,7 @@
       "age_days": 1
     },
     {
-      "id": 293,
+      "id": 294,
       "invoice_number": "LA-2026-00485",
       "vendor_id": "V-013",
       "cost_center_id": "CC-400",
@@ -76,7 +81,7 @@
       "age_days": 0
     },
     {
-      "id": 294,
+      "id": 295,
       "invoice_number": "GF-2026-00475",
       "vendor_id": "V-011",
       "cost_center_id": "CC-300",
@@ -86,7 +91,7 @@
       "age_days": 0
     },
     {
-      "id": 295,
+      "id": 296,
       "invoice_number": "HA-2026-00442",
       "vendor_id": "V-009",
       "cost_center_id": "CC-600",
@@ -96,21 +101,11 @@
       "age_days": 0
     },
     {
-      "id": 296,
-      "invoice_number": "GF-2026-00436",
-      "vendor_id": "V-011",
-      "cost_center_id": "CC-300",
-      "status": "pending_approval",
-      "gross_cents": 437686,
-      "received_at": "2026-10-31T14:44:00",
-      "age_days": 0
-    },
-    {
-      "id": 297,
+      "id": 298,
       "invoice_number": "AS-2026-00413",
       "vendor_id": "V-016",
-      "cost_center_id": "CC-300",
-      "status": "pending_approval",
+      "cost_center_id": "CC-500",
+      "status": "needs_review",
       "gross_cents": 673872,
       "received_at": "2026-10-31T15:16:00",
       "age_days": 0
@@ -120,32 +115,32 @@
     {
       "cost_center_id": "CC-100",
       "approved_count": 17,
-      "avg_hours": 62.62
+      "avg_hours": 65.15
     },
     {
       "cost_center_id": "CC-200",
-      "approved_count": 11,
-      "avg_hours": 52.01
+      "approved_count": 13,
+      "avg_hours": 56.44
     },
     {
       "cost_center_id": "CC-300",
-      "approved_count": 26,
-      "avg_hours": 65.78
+      "approved_count": 25,
+      "avg_hours": 54.71
     },
     {
       "cost_center_id": "CC-400",
-      "approved_count": 8,
-      "avg_hours": 24.88
+      "approved_count": 9,
+      "avg_hours": 40.25
     },
     {
       "cost_center_id": "CC-500",
       "approved_count": 9,
-      "avg_hours": 49.88
+      "avg_hours": 47.48
     },
     {
       "cost_center_id": "CC-600",
-      "approved_count": 5,
-      "avg_hours": 45.87
+      "approved_count": 6,
+      "avg_hours": 50.42
     }
   ],
   "rejected_by_cost_center": [
@@ -162,12 +157,7 @@
     {
       "cost_center_id": "CC-300",
       "count": 2,
-      "gross_cents": 161443
-    },
-    {
-      "cost_center_id": "CC-400",
-      "count": 1,
-      "gross_cents": 110032
+      "gross_cents": 113219
     },
     {
       "cost_center_id": "CC-500",
@@ -177,19 +167,29 @@
     {
       "cost_center_id": "CC-600",
       "count": 3,
-      "gross_cents": 579096
+      "gross_cents": 607013
     }
   ],
   "rejected_items": [
     {
       "id": 202,
-      "invoice_number": "LA-2026-00533",
-      "vendor_id": "V-013",
-      "cost_center_id": "CC-400",
-      "gross_cents": 110032,
-      "closed_at": "2026-10-02T03:52:00",
-      "rejected_by": "kim.lorenz@example.com",
+      "invoice_number": "KS-2026-00434",
+      "vendor_id": "V-001",
+      "cost_center_id": "CC-300",
+      "gross_cents": 20331,
+      "closed_at": "2026-10-02T10:56:00",
+      "rejected_by": "robin.vogt@example.com",
       "comment": "Price differs from purchase order"
+    },
+    {
+      "id": 204,
+      "invoice_number": "HA-2026-00562",
+      "vendor_id": "V-009",
+      "cost_center_id": "CC-600",
+      "gross_cents": 293538,
+      "closed_at": "2026-10-07T07:00:00",
+      "rejected_by": "finance.lead@example.com",
+      "comment": "Duplicate of an already received invoice"
     },
     {
       "id": 209,
@@ -290,26 +290,6 @@
       "closed_at": "2026-10-27T20:00:00",
       "rejected_by": "finance.lead@example.com",
       "comment": "Wrong cost center, please re-route"
-    },
-    {
-      "id": 283,
-      "invoice_number": "HA-2026-00451",
-      "vendor_id": "V-009",
-      "cost_center_id": "CC-600",
-      "gross_cents": 265621,
-      "closed_at": "2026-10-28T11:01:00",
-      "rejected_by": "mika.hartmann@example.com",
-      "comment": "Price differs from purchase order"
-    },
-    {
-      "id": 287,
-      "invoice_number": "PM-2026-00406",
-      "vendor_id": "V-010",
-      "cost_center_id": "CC-300",
-      "gross_cents": 68555,
-      "closed_at": "2026-10-28T22:50:00",
-      "rejected_by": "robin.vogt@example.com",
-      "comment": "Service not yet delivered"
     }
   ]
 }
