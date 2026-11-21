@@ -187,6 +187,10 @@ def create_app(db_path: str | Path | None = None,
                          current: datetime = Depends(now)) -> list[dict]:
         return wf.escalate_overdue(conn, (as_of or current).replace(tzinfo=None), days)
 
+    @api.get("/approvals/{approval_id}")
+    def get_approval(approval_id: int, conn: sqlite3.Connection = Depends(get_conn)) -> dict:
+        return wf.get_approval(conn, approval_id)
+
     @api.post("/approvals/{approval_id}/escalate")
     def escalate(approval_id: int, conn: sqlite3.Connection = Depends(get_conn),
                  current: datetime = Depends(now)) -> dict:
