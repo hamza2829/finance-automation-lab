@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate flow definitions (structure, run order, dead branches, API routes)
+        run: python -m flows.validate_flows --check-api
+
+      - name: Generate demo database (300 invoices)
+        run: python -m app.seed
+
+      - name: Tests with coverage
+        run: >
+          python -m pytest
+          --cov --cov-report=term --cov-report=xml
+          --cov-fail-under=85
+          --junitxml=pytest-report.xml
+
+      - name: Compare report (SQL vs M port vs Excel vs snapshot)
+        run: python -m powerquery.compare_report
+
+      - name: Error analysis is up to date
+        run: |
+          python -m analysis.error_analysis
+          git diff --exit-code -- analysis/
+
+      - name: Job summary
+        if: always()
+        run: |
+          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import xml.etree.ElementTree as ET, pathlib
+          p = pathlib.Path("pytest-report.xml")
+          if p.exists():
+              s = ET.parse(p).getroot()
+              s = s.find("testsuite") if s.tag == "testsuites" else s
+              print(f"### Tests: {s.get('tests')} run, {s.get('failures')} failed, "
+                    f"{s.get('errors')} errors, {s.get('skipped')} skipped")
+          c = pathlib.Path("coverage.xml")
+          if c.exists():
+              rate = float(ET.parse(c).getroot().get("line-rate")) * 100
+              print(f"### Line coverage: {rate:.1f} %")
+          EOF
+
+      - name: Upload report artefacts
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: reports
+          path: |
+            powerquery/output/*.xlsx
+            analysis/error_report.md
+            coverage.xml
+            pytest-report.xml
+          if-no-files-found: warn
