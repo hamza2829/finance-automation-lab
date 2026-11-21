@@ -1,0 +1,17 @@
+[project]
+name = "finance-automation-lab"
+version = "0.1.0"
+description = "Simulated invoice approval automation: flow definitions, mock accounting API, AI classifier, Power Query report and error analysis."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["app", "ai", "flows", "powerquery", "analysis"]
+omit = ["*/__main__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
