@@ -1,0 +1,607 @@
+{
+  "documents": 300,
+  "failed_api_calls": {
+    "total_calls": 558,
+    "failed_calls": 57,
+    "by_endpoint": [
+      {
+        "endpoint": "/accounting/bookings",
+        "calls": 276,
+        "ok": 226,
+        "timeouts": 14,
+        "http_5xx": 22,
+        "http_4xx": 14
+      },
+      {
+        "endpoint": "/v1/classify (LLM)",
+        "calls": 282,
+        "ok": 275,
+        "timeouts": 7,
+        "http_5xx": 0,
+        "http_4xx": 0
+      }
+    ],
+    "failed_by_status": [
+      {
+        "endpoint": "/accounting/bookings",
+        "status": "422",
+        "calls": 14
+      },
+      {
+        "endpoint": "/accounting/bookings",
+        "status": "500",
+        "calls": 3
+      },
+      {
+        "endpoint": "/accounting/bookings",
+        "status": "503",
+        "calls": 19
+      },
+      {
+        "endpoint": "/accounting/bookings",
+        "status": "timeout",
+        "calls": 14
+      },
+      {
+        "endpoint": "/v1/classify (LLM)",
+        "status": "timeout",
+        "calls": 7
+      }
+    ],
+    "booking_invoices_with_failures": 45,
+    "booking_recovered_by_retry": 31,
+    "booking_idempotent_retries": 5,
+    "booking_parked_4xx": [
+      {
+        "invoice_id": 9,
+        "invoice_date": "2026-07-30",
+        "closed_at": "2026-08-05T02:29:00",
+        "gross_cents": 798479,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 13,
+        "invoice_date": "2026-07-30",
+        "closed_at": "2026-08-05T11:32:00",
+        "gross_cents": 266088,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 15,
+        "invoice_date": "2026-07-31",
+        "closed_at": "2026-08-06T16:45:00",
+        "gross_cents": 2030276,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 16,
+        "invoice_date": "2026-07-30",
+        "closed_at": "2026-08-05T17:00:00",
+        "gross_cents": 68192,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 103,
+        "invoice_date": "2026-08-31",
+        "closed_at": "2026-09-08T03:00:00",
+        "gross_cents": 322551,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 104,
+        "invoice_date": "2026-08-27",
+        "closed_at": "2026-09-05T05:19:00",
+        "gross_cents": 246436,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 109,
+        "invoice_date": "2026-08-30",
+        "closed_at": "2026-09-06T07:27:00",
+        "gross_cents": 80136,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 111,
+        "invoice_date": "2026-08-30",
+        "closed_at": "2026-09-05T16:02:00",
+        "gross_cents": 573184,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 116,
+        "invoice_date": "2026-08-31",
+        "closed_at": "2026-09-08T11:32:00",
+        "gross_cents": 197467,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 199,
+        "invoice_date": "2026-09-25",
+        "closed_at": "2026-10-07T04:00:00",
+        "gross_cents": 512215,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 206,
+        "invoice_date": "2026-09-28",
+        "closed_at": "2026-10-05T05:10:00",
+        "gross_cents": 1704837,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 210,
+        "invoice_date": "2026-09-30",
+        "closed_at": "2026-10-06T17:22:00",
+        "gross_cents": 373684,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 214,
+        "invoice_date": "2026-09-29",
+        "closed_at": "2026-10-05T20:31:00",
+        "gross_cents": 627873,
+        "error_code": "period_closed"
+      },
+      {
+        "invoice_id": 217,
+        "invoice_date": "2026-09-30",
+        "closed_at": "2026-10-08T10:01:00",
+        "gross_cents": 2054969,
+        "error_code": "period_closed"
+      }
+    ],
+    "booking_parked_gross_cents": 9856387,
+    "approved_not_booked_other": [
+      {
+        "invoice_id": 297,
+        "gross_cents": 437686
+      },
+      {
+        "invoice_id": 299,
+        "gross_cents": 787494
+      }
+    ],
+    "llm_timeouts": 7
+  },
+  "amount_mismatches": {
+    "header_mismatch": [
+      {
+        "invoice_id": 87,
+        "vendor_id": "V-009",
+        "net_cents": 17508,
+        "tax_cents": 3327,
+        "gross_cents": 25255,
+        "difference_cents": 4420
+      },
+      {
+        "invoice_id": 176,
+        "vendor_id": "V-004",
+        "net_cents": 1830690,
+        "tax_cents": 347831,
+        "gross_cents": 2174221,
+        "difference_cents": -4300
+      },
+      {
+        "invoice_id": 223,
+        "vendor_id": "V-013",
+        "net_cents": 416526,
+        "tax_cents": 79140,
+        "gross_cents": 491411,
+        "difference_cents": -4255
+      },
+      {
+        "invoice_id": 247,
+        "vendor_id": "V-011",
+        "net_cents": 319162,
+        "tax_cents": 60641,
+        "gross_cents": 376142,
+        "difference_cents": -3661
+      },
+      {
+        "invoice_id": 293,
+        "vendor_id": "V-002",
+        "net_cents": 168311,
+        "tax_cents": 31979,
+        "gross_cents": 198998,
+        "difference_cents": -1292
+      }
+    ],
+    "ledger_mismatch": [
+      {
+        "invoice_id": 8,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 454437,
+        "booked_cents": 381880,
+        "difference_cents": 72557
+      },
+      {
+        "invoice_id": 77,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 711161,
+        "booked_cents": 597614,
+        "difference_cents": 113547
+      },
+      {
+        "invoice_id": 96,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 237077,
+        "booked_cents": 199224,
+        "difference_cents": 37853
+      },
+      {
+        "invoice_id": 140,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 240234,
+        "booked_cents": 201877,
+        "difference_cents": 38357
+      },
+      {
+        "invoice_id": 147,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 121018,
+        "booked_cents": 101696,
+        "difference_cents": 19322
+      },
+      {
+        "invoice_id": 156,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 412110,
+        "booked_cents": 346311,
+        "difference_cents": 65799
+      },
+      {
+        "invoice_id": 159,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 531013,
+        "booked_cents": 446229,
+        "difference_cents": 84784
+      },
+      {
+        "invoice_id": 171,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 628727,
+        "booked_cents": 528342,
+        "difference_cents": 100385
+      },
+      {
+        "invoice_id": 213,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 119512,
+        "booked_cents": 100430,
+        "difference_cents": 19082
+      },
+      {
+        "invoice_id": 222,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 50015,
+        "booked_cents": 42029,
+        "difference_cents": 7986
+      },
+      {
+        "invoice_id": 224,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 420739,
+        "booked_cents": 353562,
+        "difference_cents": 67177
+      },
+      {
+        "invoice_id": 238,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 180116,
+        "booked_cents": 151358,
+        "difference_cents": 28758
+      },
+      {
+        "invoice_id": 256,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 497823,
+        "booked_cents": 418339,
+        "difference_cents": 79484
+      },
+      {
+        "invoice_id": 267,
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "gross_cents": 126941,
+        "booked_cents": 106673,
+        "difference_cents": 20268
+      }
+    ],
+    "ledger_mismatch_by_vendor": [
+      {
+        "vendor_id": "V-012",
+        "vendor_name": "Nordwind Logistik",
+        "booking_amount_field": "net",
+        "entries": 14,
+        "difference_cents": 755359
+      }
+    ],
+    "ledger_difference_cents": 755359
+  },
+  "duplicates": {
+    "caught_at_intake": [
+      {
+        "invoice_id": 106,
+        "duplicate_of": 68,
+        "vendor_id": "V-009",
+        "invoice_number": "ha 2026 0411",
+        "original_number": "HA-2026-00411",
+        "gross_cents": 94590,
+        "needed_normalisation": 1
+      },
+      {
+        "invoice_id": 141,
+        "duplicate_of": 94,
+        "vendor_id": "V-008",
+        "invoice_number": "rb 2026 0461",
+        "original_number": "RB-2026-00461",
+        "gross_cents": 108992,
+        "needed_normalisation": 1
+      },
+      {
+        "invoice_id": 152,
+        "duplicate_of": 136,
+        "vendor_id": "V-001",
+        "invoice_number": "KS-2026-00477",
+        "original_number": "KS-2026-00477",
+        "gross_cents": 532357,
+        "needed_normalisation": 0
+      },
+      {
+        "invoice_id": 157,
+        "duplicate_of": 109,
+        "vendor_id": "V-006",
+        "invoice_number": "FM-2026-00458",
+        "original_number": "FM-2026-00458",
+        "gross_cents": 80136,
+        "needed_normalisation": 0
+      },
+      {
+        "invoice_id": 257,
+        "duplicate_of": 215,
+        "vendor_id": "V-016",
+        "invoice_number": "as 2026 0510",
+        "original_number": "AS-2026-00510",
+        "gross_cents": 22296,
+        "needed_normalisation": 1
+      },
+      {
+        "invoice_id": 258,
+        "duplicate_of": 190,
+        "vendor_id": "V-011",
+        "invoice_number": "gf 2026 0401",
+        "original_number": "GF-2026-00401",
+        "gross_cents": 545670,
+        "needed_normalisation": 1
+      },
+      {
+        "invoice_id": 260,
+        "duplicate_of": 218,
+        "vendor_id": "V-006",
+        "invoice_number": "FM-2026-00412",
+        "original_number": "FM-2026-00412",
+        "gross_cents": 130420,
+        "needed_normalisation": 0
+      },
+      {
+        "invoice_id": 300,
+        "duplicate_of": 268,
+        "vendor_id": "V-013",
+        "invoice_number": "LA-2026-00456",
+        "original_number": "LA-2026-00456",
+        "gross_cents": 522687,
+        "needed_normalisation": 0
+      }
+    ],
+    "caught_needing_normalisation": 4,
+    "suspected_missed": [
+      {
+        "first_id": 96,
+        "second_id": 126,
+        "vendor_id": "V-012",
+        "gross_cents": 237077,
+        "first_number": "NL-2026-00445",
+        "second_number": "NL-2026-00493",
+        "first_date": "2026-08-26",
+        "second_date": "2026-08-29",
+        "first_status": "approved",
+        "second_status": "rejected"
+      },
+      {
+        "first_id": 169,
+        "second_id": 189,
+        "vendor_id": "V-002",
+        "gross_cents": 1710631,
+        "first_number": "CH-2026-00410",
+        "second_number": "CH-2026-00476",
+        "first_date": "2026-09-16",
+        "second_date": "2026-09-19",
+        "first_status": "approved",
+        "second_status": "approved"
+      },
+      {
+        "first_id": 174,
+        "second_id": 204,
+        "vendor_id": "V-009",
+        "gross_cents": 293538,
+        "first_number": "HA-2026-00435",
+        "second_number": "HA-2026-00562",
+        "first_date": "2026-09-18",
+        "second_date": "2026-09-19",
+        "first_status": "approved",
+        "second_status": "rejected"
+      },
+      {
+        "first_id": 274,
+        "second_id": 280,
+        "vendor_id": "V-007",
+        "gross_cents": 1686309,
+        "first_number": "MK-2026-00433",
+        "second_number": "MK-2026-00494",
+        "first_date": "2026-10-21",
+        "second_date": "2026-10-24",
+        "first_status": "approved",
+        "second_status": "approved"
+      }
+    ],
+    "suspected_both_approved": [
+      {
+        "first_id": 169,
+        "second_id": 189,
+        "vendor_id": "V-002",
+        "gross_cents": 1710631,
+        "first_number": "CH-2026-00410",
+        "second_number": "CH-2026-00476",
+        "first_date": "2026-09-16",
+        "second_date": "2026-09-19",
+        "first_status": "approved",
+        "second_status": "approved"
+      },
+      {
+        "first_id": 274,
+        "second_id": 280,
+        "vendor_id": "V-007",
+        "gross_cents": 1686309,
+        "first_number": "MK-2026-00433",
+        "second_number": "MK-2026-00494",
+        "first_date": "2026-10-21",
+        "second_date": "2026-10-24",
+        "first_status": "approved",
+        "second_status": "approved"
+      }
+    ],
+    "suspected_both_approved_gross_cents": 3396940
+  },
+  "validation_holds": {
+    "on_hold": [
+      {
+        "invoice_id": 25,
+        "vendor_id": "V-014",
+        "gross_cents": -301315,
+        "currency": "EUR",
+        "hold_reason": "negative_amount"
+      },
+      {
+        "invoice_id": 76,
+        "vendor_id": "V-010",
+        "gross_cents": 66502,
+        "currency": "USD",
+        "hold_reason": "unsupported_currency: USD"
+      },
+      {
+        "invoice_id": 78,
+        "vendor_id": "V-001",
+        "gross_cents": -296456,
+        "currency": "EUR",
+        "hold_reason": "negative_amount"
+      },
+      {
+        "invoice_id": 87,
+        "vendor_id": "V-009",
+        "gross_cents": 25255,
+        "currency": "EUR",
+        "hold_reason": "amount_mismatch: net+tax=20835 gross=25255"
+      },
+      {
+        "invoice_id": 146,
+        "vendor_id": "V-016",
+        "gross_cents": -667955,
+        "currency": "EUR",
+        "hold_reason": "negative_amount"
+      },
+      {
+        "invoice_id": 176,
+        "vendor_id": "V-004",
+        "gross_cents": 2174221,
+        "currency": "EUR",
+        "hold_reason": "amount_mismatch: net+tax=2178521 gross=2174221"
+      },
+      {
+        "invoice_id": 223,
+        "vendor_id": "V-013",
+        "gross_cents": 491411,
+        "currency": "EUR",
+        "hold_reason": "amount_mismatch: net+tax=495666 gross=491411"
+      },
+      {
+        "invoice_id": 247,
+        "vendor_id": "V-011",
+        "gross_cents": 376142,
+        "currency": "EUR",
+        "hold_reason": "amount_mismatch: net+tax=379803 gross=376142"
+      },
+      {
+        "invoice_id": 286,
+        "vendor_id": "V-009",
+        "gross_cents": 56358,
+        "currency": "USD",
+        "hold_reason": "unsupported_currency: USD"
+      },
+      {
+        "invoice_id": 293,
+        "vendor_id": "V-002",
+        "gross_cents": 198998,
+        "currency": "EUR",
+        "hold_reason": "amount_mismatch: net+tax=200290 gross=198998"
+      }
+    ],
+    "by_reason": {
+      "amount_mismatch": 5,
+      "negative_amount": 3,
+      "unsupported_currency": 2
+    }
+  },
+  "ai": {
+    "by_source": [
+      {
+        "source": "human",
+        "invoices": 43
+      },
+      {
+        "source": "llm",
+        "invoices": 235
+      },
+      {
+        "source": "not classified",
+        "invoices": 18
+      },
+      {
+        "source": "rules",
+        "invoices": 4
+      }
+    ],
+    "auto_accepted": {
+      "invoices": 239,
+      "correct": 237,
+      "accuracy_pct": 99.2
+    }
+  }
+}
