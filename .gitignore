@@ -8,3 +8,4 @@ htmlcov/
 data/*.db
 data/export/
 build/
+powerquery/output/
